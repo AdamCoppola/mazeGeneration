@@ -129,10 +129,6 @@ def createGraph(bdSize, myEdges):
     # myGraph.printGraph()
     return myGraph
 
-def checkGraph(aGraph, edges):
-	print len(edges)
-
-
 def posToNodeId(row,col,bdSize):
 	return (row*bdSize) + col
 
@@ -153,28 +149,83 @@ def legalCoord(x,bdSize):
     else:
         return False
 
-# (set([0, 3]), set([0, 1]), set([1, 4]), set([1, 2]), set([2, 5]), set([3, 6]), set([3, 4]), set([4, 7]))
-def checkIfValidState(bdSize, edges):
-	allVertices = set()
-	for anEdge in edges:
-		allVertices.add(list(anEdge)[0])
-		allVertices.add(list(anEdge)[1])
-	return len(allVertices) == bdSize * bdSize
 
-# 4, 292, 453620
+def visualizeGraph(bdSize, edges):
+	visualGraph = Graph()
+	for edge in edges:
+		edgeList = list(edge)
+		visualGraph.addEdge(edgeList[0], edgeList[1])
+		visualGraph.addEdge(list(edge)[1], list(edge)[0])
+	# visualGraph.printGraph()
+	for i in range(bdSize):
+		toPrintLine = ""
+		for j in range(bdSize):
+			if j != bdSize - 1:
+				if set([(bdSize*i)+j, (bdSize*i)+j+1]) in edges:
+					toPrintLine += "*--"
+				else:
+					toPrintLine += "*  "
+		toPrintLine += "*"
+		print toPrintLine
+
+		toPrintLine = ""
+		for j in range(bdSize):
+			if set([(bdSize*i)+j, (bdSize*i)+j+bdSize]) in edges:
+				toPrintLine += "|  "
+			else:
+				toPrintLine += "   "
+
+		print toPrintLine
+
+	for edge in edges:
+		edgeList = list(edge)
+
+	
+
+
+def checkIfValidState(bdSize, edges):
+	checkGraph = Graph()
+	for edge in edges:
+		checkGraph.addEdge(list(edge)[0], list(edge)[1])
+		checkGraph.addEdge(list(edge)[1], list(edge)[0])
+	
+	vertsSeen = [checkGraph.getVertex(0)]
+	frontier = [checkGraph.getVertex(0)]
+	while frontier:
+		checkVert = frontier.pop(0)
+		if not checkVert: return False
+		for aConnection in checkVert.getConnections():
+			if aConnection not in vertsSeen:
+				frontier += [aConnection]
+				vertsSeen += [aConnection]
+		# print frontier
+	# print vertsSeen
+	return len(vertsSeen) == (bdSize*bdSize)
+
+# 4, 192, 100352
 def main():
-    bdSize = 3
-    myEdges = []
+    bdSize = 4
+    myEdges = []	
     myGraph = createGraph(bdSize, myEdges)
-    print "mark1"
     possibleValidStates = list(itertools.combinations(myEdges, bdSize*bdSize-1))
     validCount = 0
+    numPossible = len(possibleValidStates)
+    counter = 0
+    print "start check"
     for aPossibleValidState in possibleValidStates:
+    	counter += 1
         if checkIfValidState(bdSize, aPossibleValidState):
-            print aPossibleValidState
-            
+            visualizeGraph(bdSize, aPossibleValidState)
             validCount += 1
+    	if(counter % 10000 == 0):
+    		print counter, " / ", numPossible, " : ", validCount
     print validCount
+
+
+
+
+
+    # print validEdgeCounts
 
     # for aPossibleState  in possibleValidStates:
         
